@@ -63,18 +63,18 @@ table.preview{width:100%;border-collapse:collapse;font-size:10px;table-layout:fi
         <div class="field"><label>Address</label><input type="text" id="bizAddress" placeholder="Street, area, city" /></div>
         <div class="field"><label>Phone / Fax</label><input type="text" id="bizPhone" placeholder="Ph: ..., Fax: ..." /></div>
         <div class="field"><label>License / Reg #</label><input type="text" id="bizLicense" placeholder="Optional" /></div>
-        <div class="field"><label>Withholding tax %</label><input type="number" id="bizWht" step="0.1" value="2.5" /></div>
-        <div class="field"><label>Previous balance (Rs)</label><input type="number" id="prevBalance" step="0.01" value="0" /></div>
+        <div class="field"><label>Withholding tax %</label><input type="number" id="bizWht" step="any" value="2.5" /></div>
+        <div class="field"><label>Previous balance (Rs)</label><input type="number" id="prevBalance" step="any" value="0" /></div>
       </div>
     </div>
 
     <div class="card">
       <h3>Invoice &amp; party details</h3>
       <div class="grid">
-        <div class="field"><label>Invoice number <span class="req">*</span></label><input type="text" id="invoiceNo" placeholder="e.g. 8762" required /></div>
-        <div class="field"><label>Date <span class="req">*</span></label><input type="text" id="invoiceDate" placeholder="DD/MM/YYYY" required /></div>
-        <div class="field"><label>Party / customer <span class="req">*</span></label><input type="text" id="party" placeholder="Customer or pharmacy name" required /></div>
-        <div class="field"><label>City / area <span class="req">*</span></label><input type="text" id="area" placeholder="e.g. Kohat" required /></div>
+        <div class="field"><label>Invoice number</label><input type="text" id="invoiceNo" placeholder="e.g. 8762" /></div>
+        <div class="field"><label>Date</label><input type="text" id="invoiceDate" placeholder="DD/MM/YYYY" /></div>
+        <div class="field"><label>Party / customer</label><input type="text" id="party" placeholder="Customer or pharmacy name" /></div>
+        <div class="field"><label>City / area</label><input type="text" id="area" placeholder="e.g. Kohat" /></div>
         <div class="field"><label>Address</label><input type="text" id="address" placeholder="Customer address" /></div>
         <div class="field"><label>Booker</label><input type="text" id="booker" placeholder="Optional" /></div>
         <div class="field"><label>Salesman</label><input type="text" id="salesman" placeholder="Optional" /></div>
@@ -89,10 +89,10 @@ table.preview{width:100%;border-collapse:collapse;font-size:10px;table-layout:fi
           <thead>
             <tr>
               <th style="width:26px;">S#</th>
-              <th style="width:19%;">Item *</th>
+              <th style="width:19%;">Item</th>
               <th style="width:12%;">Batch &amp; Exp</th>
-              <th style="width:8%;">Rate *</th>
-              <th style="width:6%;">Qty *</th>
+              <th style="width:8%;">Rate</th>
+              <th style="width:6%;">Qty</th>
               <th style="width:6%;">Bonus</th>
               <th style="width:7%;">Total Qty</th>
               <th style="width:8%;">Disc %</th>
@@ -103,14 +103,14 @@ table.preview{width:100%;border-collapse:collapse;font-size:10px;table-layout:fi
           <tbody id="itemsEntryBody">
             <tr class="item-row">
               <td class="snum">1</td>
-              <td><input type="text" class="item-name item-name-input" placeholder="Item name" required /></td>
+              <td><input type="text" class="item-name item-name-input" placeholder="Item name" /></td>
               <td><input type="text" class="batch-exp" placeholder="B# / Exp" /></td>
-              <td><input type="number" class="tp-rate" step="0.01" placeholder="0.00" required /></td>
-              <td><input type="number" class="qty" min="1" value="1" required /></td>
-              <td><input type="number" class="bon" min="0" value="0" /></td>
+              <td><input type="number" class="tp-rate" step="any" placeholder="0.00" /></td>
+              <td><input type="number" step="any" class="qty" value="1" /></td>
+              <td><input type="number" step="any" class="bon" value="0" /></td>
               <td><input type="number" class="total" readonly /></td>
-              <td><input type="number" class="discount" step="0.01" min="0" max="100" value="0" /></td>
-              <td><input type="number" class="sales-tax" step="0.01" min="0" value="0" /></td>
+              <td><input type="number" class="discount" step="any" value="0" /></td>
+              <td><input type="number" class="sales-tax" step="any" value="0" /></td>
               <td><button type="button" class="remove-btn" onclick="removeItem(this)">×</button></td>
             </tr>
           </tbody>
@@ -236,6 +236,7 @@ table.preview{width:100%;border-collapse:collapse;font-size:10px;table-layout:fi
 <script>
 let invoiceItems = [];
 let currentInvoiceData = {};
+const itemRowTemplate = document.querySelector('.item-row').cloneNode(true);
 
 document.addEventListener('DOMContentLoaded', function () {
   const today = new Date();
@@ -261,7 +262,7 @@ function showSection(section) {
 function addNewItemRow() {
   const tbody = document.getElementById('itemsEntryBody');
   const rows = tbody.querySelectorAll('.item-row');
-  const newRow = rows[0].cloneNode(true);
+  const newRow = itemRowTemplate.cloneNode(true);
 
   newRow.querySelector('.item-name').value = '';
   newRow.querySelector('.batch-exp').value = '';
@@ -277,16 +278,11 @@ function addNewItemRow() {
 }
 
 function removeItem(button) {
-  const row = button.closest('tr');
   const tbody = document.getElementById('itemsEntryBody');
-  if (tbody.querySelectorAll('.item-row').length > 1) {
-    row.remove();
-    tbody.querySelectorAll('.item-row').forEach((r, i) => {
-      r.querySelector('.snum').textContent = i + 1;
-    });
-  } else {
-    alert('At least one item is required');
-  }
+  button.closest('tr').remove();
+  tbody.querySelectorAll('.item-row').forEach((r, i) => {
+    r.querySelector('.snum').textContent = i + 1;
+  });
 }
 
 function updateRowTotal(row) {
@@ -320,7 +316,6 @@ function collectInvoiceData() {
     const itemName = row.querySelector('.item-name').value;
     const rate = parseFloat(row.querySelector('.tp-rate').value) || 0;
     const qty = parseFloat(row.querySelector('.qty').value) || 0;
-    if (!itemName || rate <= 0 || qty <= 0) return;
 
     const batch = row.querySelector('.batch-exp').value || '-';
     const bon = parseFloat(row.querySelector('.bon').value) || 0;
@@ -339,21 +334,8 @@ function collectInvoiceData() {
   });
 }
 
-function validateForm() {
-  if (!currentInvoiceData.invoiceNo || !currentInvoiceData.party || !currentInvoiceData.area || !currentInvoiceData.invoiceDate) {
-    alert('Please fill invoice number, date, party and city/area.');
-    return false;
-  }
-  if (invoiceItems.length === 0) {
-    alert('Add at least one item with a name, rate and quantity.');
-    return false;
-  }
-  return true;
-}
-
 function generateInvoice() {
   collectInvoiceData();
-  if (!validateForm()) return;
 
   document.getElementById('invNoDisplay').textContent = currentInvoiceData.invoiceNo;
   document.getElementById('displayInvNo').textContent = currentInvoiceData.invoiceNo;
@@ -513,6 +495,7 @@ function clearForm() {
   ['party', 'area', 'address', 'booker', 'salesman', 'license', 'remarks'].forEach(id => document.getElementById(id).value = '');
 
   const tbody = document.getElementById('itemsEntryBody');
+  if (!tbody.querySelector('.item-row')) addNewItemRow();
   const first = tbody.querySelector('.item-row');
   first.querySelector('.item-name').value = '';
   first.querySelector('.batch-exp').value = '';
